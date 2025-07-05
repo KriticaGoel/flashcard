@@ -39,12 +39,20 @@
         }
 
         .card {
-            position: relative;
-            width: 90%;
-            max-width: 600px;
-            height: 60vh;
+            /*position: relative;*/
+            /*width: 90%;*/
+            /*max-width: 600px;*/
+            /*height: 60vh;*/
+            /*perspective: 1500px;*/
+            /*margin: auto;*/
+            /*touch-action: pan-x pan-y;*/
+
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            max-width: 100%;
+            max-height: 100%;
             perspective: 1500px;
-            margin: auto;
             touch-action: pan-x pan-y;
         }
 
@@ -56,9 +64,11 @@
             transition: transform 0.8s;
             transform-style: preserve-3d;
             background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-radius: 10px;
+            /*box-shadow: 0 4px 8px rgba(0,0,0,0.1);*/
+            /*border-radius: 10px;*/
             cursor: pointer;
+            border-radius: 0;
+            box-shadow: none;
         }
 
         .card.flipped .card-inner {
@@ -72,12 +82,20 @@
             backface-visibility: hidden;
             display: flex;
             align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            overflow-y: auto;
+            /*justify-content: center;*/
             padding: 20px;
             box-sizing: border-box;
+
+            justify-content: flex-start;
+            /*align-items: flex-start;*/
         }
 
         .card-back {
+            flex-direction: column;
+            overflow-y: auto;
+            white-space: pre-wrap;
             transform: rotateY(180deg);
         }
 
@@ -95,6 +113,30 @@
             max-width: 100%;
         }
         /* ... existing styles ... */
+         #answer {
+            white-space: pre-wrap;
+            overflow-y: auto;
+            word-break: break-word;
+            font-size: clamp(16px, 2vw, 24px);
+            line-height: 1.5;
+            padding: 10px;
+            max-height: 100%;
+            width: 100%;
+            text-align: left;
+        }
+
+        #codeSnippet {
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: clamp(14px, 2vw, 20px);
+            background-color: #f7f7f7;
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
         #studyMode, #cardsList {
             display: none;
         }

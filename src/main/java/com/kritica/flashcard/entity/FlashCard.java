@@ -21,6 +21,5 @@ public class FlashCard {
     private String codeSnippet;
 
     private String category;
-    private boolean show;
 }
 
