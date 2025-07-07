@@ -73,11 +73,15 @@
     @RestControllerAdvice - this is a class level annotation
     @ExceptionHandler - this is a method level annotation having class as an argument
     </p>
-        <img src="\images\contollerAdvicer.PNG" alt="contollerAdvicer.PNG" width="500" height="600">
+    <img
+            src="/images/contollerAdvicer.PNG"
+            alt="Controller Advice Diagram"
+            class="img-fluid"
+            style="max-width:100%; height:auto;">
 
 
 
-  <h2 class="section-title"> Step  1. Create a DTO</h2>
+    <h2 class="section-title"> Step  1. Create a DTO</h2>
   <pre><code class="language-java">
     @Data
     public class ProductNotFoundExceptionDto {
@@ -162,6 +166,7 @@ Category cat = categories.stream()
 
   <!-- 5. Centralizing Messages -->
   <h2 class="section-title">5. Centralizing Messages</h2>
+    <p>Use Constants or Enum for Messages Define your messages in a central place, like a constants class or an enum</p>
   <h5>a) Constants / Enums</h5>
   <pre><code class="language-java">
 public class ErrorMessages {
@@ -177,6 +182,7 @@ throw new ResourceNotFoundException(
 
   <h5>b) Internationalization (i18n)</h5>
   <p>Inject <code>MessageSource</code> to fetch localized messages:</p>
+    <p>Use Message Source for Internationalization If your app requires i18n, inject Spring’s MessageSource in your service or controller and fetch messages by key:</p>
   <pre><code class="language-java">
 @Service
 public class UserService {
@@ -201,6 +207,13 @@ public class UserService {
     error.user.notfound=User not found
   </div>
 
+    <h2 class="section-title">Best Practise</h2>
+    <p>Use Service Layer for throwing exceptions and ControllerAdvice for handling them.</p>
+    <img
+            src="/images/ExceptionhandlerBest.PNG"
+            alt="Controller Advice Diagram"
+            class="img-fluid"
+            style="max-width:100%; height:auto;">
 </main>
 
 <!-- Prism.js for syntax highlighting -->

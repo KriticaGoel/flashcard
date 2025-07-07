@@ -2,90 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Flashcard Viewer</title>
+  <title>Flashcards – Study & Revision</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f8f9fa;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
+    body { font-family: Arial, sans-serif; background: #f8f9fa; margin:0; padding: 20px }
+    h1 { text-align: center; margin-bottom: 20px }
     .selectors {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 20px;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; margin-bottom: 20px;
     }
-
-    select {
-      padding: 8px;
-      font-size: 16px;
+    select, label {
+      font-size: 16px; padding: 6px;
     }
-
+    #contentArea, #cardsContainer {
+      max-width: 800px; margin: 0 auto;
+    }
+    /* Revision cards */
     .question-card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
+      background: #fff; border: 1px solid #ddd;
+      border-radius: 8px; padding:15px; margin-bottom:10px;
     }
-
-    .question-card p {
-      margin: 5px 0;
-    }
-
-    /*.answer {*/
-    /*  display: none;*/
-    /*  margin-top: 10px;*/
-    /*  padding: 10px;*/
-    /*  background-color: #f0f0f5;*/
-    /*  border-left: 3px solid #007bff;*/
-    /*}*/
-
-    .question-card  {
-      background: #ffffff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
     .answer {
-      background: #f9f9f9;
-      margin-top: 10px;
-      padding: 10px;
-      border-left: 4px solid #007bff;
-      font-style: italic;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: #f9f9f9; padding:10px;
+      border-left:4px solid #007bff; white-space: pre-wrap;
+      margin-top:10px;
     }
-
     .btn-toggle {
-      margin-top: 8px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
+      background: #007bff; color: #fff; border:none;
+      padding:6px 12px; border-radius:4px; cursor:pointer;
+      margin-top:10px;
     }
-
     .code-snippet {
-      background-color: #f4f4f4;
-      padding: 10px;
-      margin-top: 10px;
-      border-left: 4px solid #333;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: #f4f4f4; padding:10px; font-family:monospace;
+      white-space:pre-wrap; border-left:4px solid #333;
+      margin-top:10px;
     }
-
+    /* Study iframe */
+    #studyFrame {
+      width: 100%; height: 80vh; border:1px solid #ccc;
+      border-radius:8px; display: none;
+    }
+    #studyMsg {
+      padding:20px; background:#fff;
+      border:1px solid #ddd; border-radius:8px;
+      text-align:center; display:none;
+    }
   </style>
 </head>
 <body>
@@ -93,243 +54,138 @@
 <h1>Flashcards</h1>
 
 <div class="selectors">
-  <select id="categorySelect" onchange="filterCards()">
-    <option value="">-- Select Category --</option>
-  </select>
-  <select id="topicSelect" onchange="filterCards()">
-    <option value="">-- Select Topic --</option>
-  </select>
-  <label style="text-align:center; margin: 10px;" for="modeSelect">Choose Mode:</label>
+  <label for="modeSelect">Mode:</label>
   <select id="modeSelect" onchange="handleModeChange()">
     <option value="study">Study</option>
     <option value="revision">Revision</option>
   </select>
-</div>
-<div id="contentArea"></div>
 
+  <label for="categorySelect">Category:</label>
+  <select id="categorySelect" onchange="handleModeChange()">
+    <option value="">-- Select Category --</option>
+  </select>
+
+  <label for="topicSelect">Topic:</label>
+  <select id="topicSelect" onchange="handleModeChange()">
+    <option value="">-- Select Topic --</option>
+  </select>
+</div>
+
+<!-- Study Mode -->
+<div id="contentArea">
+  <iframe id="studyFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+  <div id="studyMsg">Please select both Category and Topic in Study mode.</div>
+</div>
+
+<!-- Revision Mode -->
 <div id="cardsContainer"></div>
 
-<!--<script>-->
-<!--  // Sample Data-->
-<!--  const flashcards = [-->
-<!--    { id: 1, category: 'Java', topic: 'Spring Boot', question: 'What is Spring Boot?', answer: 'A framework for building microservices quickly.' },-->
-<!--    { id: 2, category: 'JavaScript', topic: 'React', question: 'What is JSX?', answer: 'JSX is a syntax extension for JavaScript used with React.' },-->
-<!--    { id: 3, category: 'Java', topic: 'Spring Boot', question: 'How do you create REST API?', answer: 'Use @RestController and @RequestMapping annotations.' },-->
-<!--    { id: 4, category: 'JavaScript', topic: 'React', question: 'What are React hooks?', answer: 'Hooks let you use state and lifecycle in functional components.' }-->
-<!--  ];-->
-
-<!--  function initSelectors() {-->
-<!--    const categorySet = new Set(flashcards.map(c => c.category));-->
-<!--    const topicSet = new Set(flashcards.map(c => c.topic));-->
-
-<!--    const categorySelect = document.getElementById('categorySelect');-->
-<!--    const topicSelect = document.getElementById('topicSelect');-->
-
-<!--    for (const cat of categorySet) {-->
-<!--      const option = document.createElement('option');-->
-<!--      option.value = cat;-->
-<!--      option.textContent = cat;-->
-<!--      categorySelect.appendChild(option);-->
-<!--    }-->
-
-<!--    for (const topic of topicSet) {-->
-<!--      const option = document.createElement('option');-->
-<!--      option.value = topic;-->
-<!--      option.textContent = topic;-->
-<!--      topicSelect.appendChild(option);-->
-<!--    }-->
-<!--  }-->
-
-<!--  function filterCards() {-->
-<!--    const category = document.getElementById('categorySelect').value;-->
-<!--    const topic = document.getElementById('topicSelect').value;-->
-
-<!--    const filtered = flashcards.filter(card =>-->
-<!--      (!category || card.category === category) &&-->
-<!--      (!topic || card.topic === topic)-->
-<!--    );-->
-
-<!--    renderCards(filtered);-->
-<!--  }-->
-
-<!--  function renderCards(cards) {-->
-<!--    const container = document.getElementById('cardsContainer');-->
-<!--    container.innerHTML = '';-->
-
-<!--    if (cards.length === 0) {-->
-<!--      container.innerHTML = '<p>No flashcards found for this selection.</p>';-->
-<!--      return;-->
-<!--    }-->
-
-<!--    for (const card of cards) {-->
-<!--      const div = document.createElement('div');-->
-<!--      div.className = 'question-card';-->
-
-<!--      const q = document.createElement('p');-->
-<!--      q.textContent = `Q: ${card.question}`;-->
-<!--      div.appendChild(q);-->
-
-<!--      const ans = document.createElement('div');-->
-<!--      ans.className = 'answer';-->
-<!--      ans.textContent = `A: ${card.answer}`;-->
-<!--      div.appendChild(ans);-->
-
-<!--      const btn = document.createElement('button');-->
-<!--      btn.className = 'btn-toggle';-->
-<!--      btn.textContent = 'Show Answer';-->
-<!--      btn.onclick = () => {-->
-<!--        if (ans.style.display === 'none') {-->
-<!--          ans.style.display = 'block';-->
-<!--          btn.textContent = 'Hide Answer';-->
-<!--        } else {-->
-<!--          ans.style.display = 'none';-->
-<!--          btn.textContent = 'Show Answer';-->
-<!--        }-->
-<!--      };-->
-<!--      div.appendChild(btn);-->
-
-<!--      container.appendChild(div);-->
-<!--    }-->
-<!--  }-->
-
-<!--  document.addEventListener('DOMContentLoaded', () => {-->
-<!--    initSelectors();-->
-<!--    renderCards(flashcards); // Initially show all-->
-<!--  });-->
-<!--</script>-->
-
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initSelectors().then(handleModeChange);
+  });
 
+  // 1) Populate Category & Topic from /api/flashcards/meta
+  async function initSelectors() {
+    try {
+      const res = await fetch('/api/flashcards/meta');
+      const { categories, topics } = await res.json();
+      const catSel = document.getElementById('categorySelect');
+      const topSel = document.getElementById('topicSelect');
+      categories.forEach(c => catSel.add(new Option(c, c)));
+      topics   .forEach(t => topSel.add(new Option(t, t)));
+    } catch (err) {
+      console.error('Failed to load metadata', err);
+    }
+  }
+
+  // 2) Handle Mode / Category / Topic changes
   async function handleModeChange() {
-    const mode = document.getElementById('modeSelect').value;
-    const container = document.getElementById('contentArea');
-    container.innerHTML = ''; // Clear previous content
-
-    if (mode === 'revision') {
-      // Load revision question list
-      filterCards();
-    } else {
-      // Load full topic details (e.g. a 5-page explanation)
-      // const topic = document.getElementById('topicSelect')?.value || 'General';
-      // const response = await fetch(`/api/topics/${encodeURIComponent(topic)}/details`);
-      // const text = await response.text(); // assuming text/html response
-      text="SpringBoot-CustomExceptionHandling.html";
-      const detailDiv = document.createElement('div');
-      detailDiv.innerHTML = text;
-      container.appendChild(detailDiv);
-    }
-  }
-
-  // Optional: initialize on load
-  document.addEventListener('DOMContentLoaded', handleModeChange);
-
-  async function fetchFlashcards(category = '', topic = '') {
-    const query = new URLSearchParams({ category, topic });
-    const response = await fetch(`/api/flashcards?${query}`);
-    if (!response.ok) {
-      alert('Failed to fetch flashcards');
-      return [];
-    }
-    return await response.json();
-  }
-
-  async function filterCards() {
+    const mode     = document.getElementById('modeSelect').value;
     const category = document.getElementById('categorySelect').value;
-    const topic = document.getElementById('topicSelect').value;
-    const cards = await fetchFlashcards(category, topic);
-    renderCards(cards);
-  }
+    const topic    = document.getElementById('topicSelect').value;
+    const iframe   = document.getElementById('studyFrame');
+    const studyMsg = document.getElementById('studyMsg');
+    const cardsDiv = document.getElementById('cardsContainer');
 
-  function renderCards(cards) {
-    const container = document.getElementById('cardsContainer');
-    container.innerHTML = ''; // Clear previous content
+    if (mode === 'study') {
+      // show study, hide revision
+      cardsDiv.style.display   = 'none';
+      iframe.style.display     = 'none';
+      studyMsg.style.display   = 'none';
 
-    if (cards.length === 0) {
-      container.innerHTML = '<p>No flashcards found for this selection.</p>';
-      return;
-    }
-
-    for (const card of cards) {
-      const div = document.createElement('div');
-      div.className = 'question-card';
-
-      // Question
-      const questionEl = document.createElement('p');
-      questionEl.textContent = `Q: ${card.question}`;
-      div.appendChild(questionEl);
-
-      // Answer + Code container
-      const detailsContainer = document.createElement('div');
-      detailsContainer.style.display = 'none';
-
-      // Answer
-      const answerEl = document.createElement('div');
-      answerEl.className = 'answer';
-      answerEl.textContent = `A: ${card.answer}`;
-      detailsContainer.appendChild(answerEl);
-
-      // Code Snippet (if present)
-      if (card.codeSnippet && card.codeSnippet.trim() !== '') {
-        const pre = document.createElement('pre');
-        pre.textContent = card.codeSnippet;
-        pre.className = 'code-snippet';
-        detailsContainer.appendChild(pre);
+      if (category && topic) {
+        const filename = `/${category}-${topic}.html`;
+        iframe.src = filename;
+        iframe.style.display = 'block';
+      } else {
+        studyMsg.textContent = 'Please select both Category and Topic in Study mode.';
+        studyMsg.style.display = 'block';
       }
 
-      div.appendChild(detailsContainer);
-
-      // Toggle Button
-      const toggleBtn = document.createElement('button');
-      toggleBtn.textContent = 'Show Details';
-      toggleBtn.className = 'btn-toggle';
-      toggleBtn.onclick = () => {
-        const visible = detailsContainer.style.display === 'block';
-        detailsContainer.style.display = visible ? 'none' : 'block';
-        toggleBtn.textContent = visible ? 'Show Details' : 'Hide Details';
-      };
-
-      div.appendChild(toggleBtn);
-      container.appendChild(div);
+    } else {
+      // show revision, hide study
+      iframe.src = 'about:blank';
+      iframe.style.display = 'none';
+      studyMsg.style.display = 'none';
+      cardsDiv.style.display = 'block';
+      await loadRevision(category, topic);
     }
   }
 
+  // 3) Fetch & render revision cards
+  async function loadRevision(category, topic) {
+    const cardsDiv = document.getElementById('cardsContainer');
+    cardsDiv.innerHTML = '';
+    try {
+      const q = new URLSearchParams({ category, topic });
+      const res = await fetch(`/api/flashcards?${q}`);
+      const cards = await res.json();
+      if (!cards.length) {
+        cardsDiv.innerHTML = '<p>No flashcards found.</p>';
+        return;
+      }
+      cards.forEach(card => {
+        const d = document.createElement('div');
+        d.className = 'question-card';
 
+        const qEl = document.createElement('p');
+        qEl.textContent = `Q: ${card.question}`;
+        d.appendChild(qEl);
 
-  // Initial population of selects from API
-  async function initSelectors() {
-    const categorySelect = document.getElementById('categorySelect');
-    const topicSelect = document.getElementById('topicSelect');
+        const details = document.createElement('div');
+        details.style.display = 'none';
 
-    const response = await fetch('/api/flashcards/meta'); // returns list of categories and topics
-    if (!response.ok) {
-      console.error('Failed to fetch metadata');
-      return;
+        const aEl = document.createElement('div');
+        aEl.className = 'answer';
+        aEl.textContent = `A: ${card.answer}`;
+        details.appendChild(aEl);
+
+        if (card.codeSnippet) {
+          const pre = document.createElement('pre');
+          pre.className = 'code-snippet';
+          pre.textContent = card.codeSnippet;
+          details.appendChild(pre);
+        }
+        d.appendChild(details);
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-toggle';
+        btn.textContent = 'Show Details';
+        btn.onclick = () => {
+          const show = details.style.display === 'block';
+          details.style.display = show ? 'none' : 'block';
+          btn.textContent = show ? 'Show Details' : 'Hide Details';
+        };
+        d.appendChild(btn);
+
+        cardsDiv.appendChild(d);
+      });
+    } catch (err) {
+      console.error('Error loading flashcards', err);
+      cardsDiv.innerHTML = '<p>Error loading flashcards.</p>';
     }
-    const metadata = await response.json();
-
-    metadata.categories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      categorySelect.appendChild(opt);
-    });
-
-    metadata.topics.forEach(topic => {
-      const opt = document.createElement('option');
-      opt.value = topic;
-      opt.textContent = topic;
-      topicSelect.appendChild(opt);
-    });
-
-    // Load initial cards
-    filterCards();
   }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    initSelectors();
-  });
 </script>
-
-
 </body>
 </html>

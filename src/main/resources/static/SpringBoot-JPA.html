@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Data JPA – Notes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Optional: Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism.css">
+    <style>
+        body { font-family: Arial, sans-serif; background:#f8f9fa; padding: 20px; }
+        h1, h2, h3 { color: #007bff; margin-top: 2rem; }
+        ul { list-style-type: square; padding-left: 1.2rem; }
+        pre { background: #f4f4f4; padding: 10px; border-left: 4px solid #007bff;
+            white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .section { margin-bottom: 2rem; }
+    </style>
+</head>
+<body>
+
+<h1 id="agenda">Agenda</h1>
+<ul>
+    <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#annotations">Annotation</a></li>
+    <li><a href="#springjpahibernateddl">spring.jpa.hibernate.ddl</a></li>
+    <li><a href="#generatetype">GenerateType</a></li>
+    <li><a href="#repository">Repository</a></li>
+    <li><a href="#customised-method-in-jpa">Customised Method in JPA</a></li>
+    <li><a href="#custom-query-in-jpa">Custom Query in JPA</a></li>
+    <li><a href="#relations">Relations</a>
+        <ul>
+            <li><a href="#one-to-one-mapping">one-to-one mapping</a></li>
+            <li><a href="#one-to-many-mapping">one-to-many mapping</a></li>
+            <li><a href="#many-to-many-mapping">many-to-many mapping</a></li>
+            <li><a href="#circularreference">CircularReference</a></li>
+        </ul>
+    </li>
+    <li><a href="#cascading">Cascading</a></li>
+</ul>
+
+<div class="section" id="configuration">
+    <h2>Configuration</h2>
+    <h3>pom.xml</h3>
+    <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;com.mysql&lt;/groupId&gt;
+  &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;
+  &lt;version&gt;9.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+    <h3>application.properties</h3>
+    <pre><code class="language-properties">spring.datasource.url=jdbc:mysql://localhost:3306/sb_learn
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.hibernate.ddl-auto=update</code></pre>
+</div>
+
+<div class="section" id="annotations">
+    <h2>Annotations</h2>
+    <ul>
+        <li>@Entity – marks class as a JPA entity</li>
+        <li>@Entity(name="abc") – sets table name manually</li>
+        <li>@Id – primary key</li>
+        <li>@GeneratedValue(strategy = GenerationType.IDENTITY)</li>
+    </ul>
+</div>
+
+<div class="section" id="springjpahibernateddl">
+    <h2>spring.jpa.hibernate.ddl-auto</h2>
+    <ul>
+        <li><strong>create</strong> – creates schema on startup</li>
+        <li><strong>create-drop</strong> – creates schema and drops on shutdown</li>
+        <li><strong>update</strong> – updates schema</li>
+    </ul>
+</div>
+
+<div class="section" id="generatetype">
+    <h2>GenerateType</h2>
+    <ul>
+        <li>Auto</li>
+        <li>Identity</li>
+        <li>Table</li>
+        <li>UUID</li>
+        <li>Sequence</li>
+    </ul>
+    <pre><code class="language-java">@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cat_seq")
+@SequenceGenerator(name="cat_seq", sequenceName="cat_sequence", allocationSize=1)</code></pre>
+</div>
+
+<div class="section" id="repository">
+    <h2>Repository</h2>
+    <p>CrudRepository and JpaRepository</p>
+    <pre><code class="language-java">public interface CategoryRepository extends JpaRepository&lt;Category, Integer&gt; {
+}</code></pre>
+</div>
+
+<div class="section" id="customised-method-in-jpa">
+    <h2>Customised Method in JPA</h2>
+    <p>Use findBy&lt;FieldName&gt;() to auto-generate queries based on attributes.</p>
+</div>
+
+<div class="section" id="custom-query-in-jpa">
+    <h2>Custom Query in JPA</h2>
+    <pre><code class="language-java">@Query("update User u set u.role = ?1 where u.name = ?2")
+int updateRole(String role, String name);
+
+@Query("select t.id FROM User t where t.role = :role AND t.name = :name")
+Optional&lt;User&gt; findByRoleAndName(@Param("role") String role, @Param("name") String name);</code></pre>
+</div>
+
+<div class="section" id="relations">
+    <h2>Relations</h2>
+
+    <h3 id="one-to-one-mapping">One-to-One Mapping</h3>
+    <p>Annotations:</p>
+    <pre><code class="language-java">@OneToOne(mappedBy = "socialUser")
+private SocialProfile socialProfile;
+
+@OneToOne
+@JoinColumn(name="social_user_id")
+private SocialUsers socialUser;</code></pre>
+
+    <h3 id="one-to-many-mapping">One-to-Many Mapping</h3>
+    <pre><code class="language-java">@OneToMany(mappedBy = "socialUser")
+private List&lt;Post&gt; posts;
+
+@ManyToOne
+@JoinColumn(name = "social_user_id")
+private SocialUsers socialUser;</code></pre>
+
+    <h3 id="many-to-many-mapping">Many-to-Many Mapping</h3>
+    <pre><code class="language-java">@ManyToMany
+@JoinTable(
+  joinColumns = @JoinColumn(name="user_id"),
+  inverseJoinColumns = @JoinColumn(name = "group_id")
+)
+private Set&lt;SocialGroup&gt; groups;
+
+@ManyToMany(mappedBy = "groups")
+private Set&lt;SocialUsers&gt; socialUsers;</code></pre>
+</div>
+
+<div class="section" id="circularreference">
+    <h2>Circular Reference</h2>
+    <p>Use @JsonIgnore to avoid serialization loops.</p>
+</div>
+
+<div class="section" id="cascading">
+    <h2>Cascading</h2>
+    <p>Cascade operations: Persist, Merge, Remove, Refresh, Detach, All</p>
+    <pre><code class="language-java">@OneToOne(mappedBy = "socialUser", cascade = CascadeType.ALL)
+public void setSocialProfile(SocialProfile socialProfile) {
+  socialProfile.setSocialUser(this);
+  this.socialProfile = socialProfile;
+}</code></pre>
+</div>
+
+<div class="section" id="fetchtype">
+    <h2>FetchType</h2>
+    <p>
+        <strong>FetchType</strong> plays a crucial role in defining how and when related entities are loaded from the database in relation to the parent entity.
+    </p>
+    <ul>
+        <li><strong>LAZY</strong> – Related entities are loaded only when accessed in code</li>
+        <li><strong>EAGER</strong> – Related entities are loaded immediately with parent entity</li>
+    </ul>
+
+    <p><strong>Use Case:</strong></p>
+    <p>
+        Consider a system with a Customer and Orders (one-to-many). Using <code>FetchType.EAGER</code> will load all orders with every customer query—which can waste memory. <code>FetchType.LAZY</code> defers loading orders until they’re explicitly needed—ideal for performance.
+    </p>
+
+    <h3>Default FetchType per Mapping</h3>
+    <ul>
+        <li><strong>OneToMany</strong> – Lazy</li>
+        <li><strong>ManyToOne</strong> – Eager</li>
+        <li><strong>ManyToMany</strong> – Lazy</li>
+        <li><strong>OneToOne</strong> – Eager</li>
+    </ul>
+
+    <pre><code class="language-java">@ManyToMany(mappedBy = "socialUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL)</code></pre>
+</div>
+
+<div class="section" id="base-model-best-practices">
+    <h2>Best Practices: Base Model Class</h2>
+
+    <p><strong>Step 1:</strong> Create a base model class with common fields.</p>
+    <pre><code class="language-java">@Data
+@MappedSuperclass
+public abstract class BaseModel {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Date creationDate;
+    private Date modificationDate;
+    private String createdBy;
+    private String modifiedBy;
+    private State state;
+}</code></pre>
+
+    <p><strong>Step 2:</strong> Extend base model in entities.</p>
+
+    <h3>User class</h3>
+    <pre><code class="language-java">@Data
+@Entity
+public class User extends BaseModel {
+    @Column(unique = true, length = 50)
+    private String username;
+    @Column(length = 50)
+    private String password;
+    @Column(length = 100, unique = true)
+    private String email;
+    @Column(length = 15, unique = true)
+    private String phone;
+}</code></pre>
+
+    <h3>Role class</h3>
+    <pre><code class="language-java">@Data
+@Entity
+public class Role extends BaseModel {
+    private String roleName;
+}</code></pre>
+</div>
+
+
+<!-- Optional Prism.js for syntax coloring -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-properties.min.js"></script>
+</body>
+</html>
