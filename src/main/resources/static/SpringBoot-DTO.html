@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>DTO Validation with Jakarta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #007bff;
+        }
+        .section {
+            margin-bottom: 2rem;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        ul {
+            padding-left: 1.2rem;
+        }
+        code {
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Validating DTOs with Jakarta Validation</h1>
+
+<div class="section">
+    <h2>Step 1: Add Dependency</h2>
+    <p>Add the following to your <code>pom.xml</code>:</p>
+    <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+
+<div class="section">
+    <h2>Step 2: Import Required Annotations</h2>
+    <pre><code class="language-java">import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;</code></pre>
+</div>
+
+<div class="section">
+    <h2>Step 3: Use Annotations in DTO</h2>
+    <pre><code class="language-java">public class UserRequestDto {
+
+  @NotNull(message = "username cannot be null")
+  @Size(min = 3, max = 20, message = "username must contain at least 3 character")
+  private String username;
+
+  @NotNull(message = "Password cannot be null")
+  @Size(min = 5, max = 50, message = "Password must contain at least 5 characters")
+  @Pattern(regexp = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]+$",
+           message = "Password must contain at least one number, one capital letter, and one special character")
+  private String password;
+
+  @Email(message = "Email is not valid")
+  @NotNull(message = "Email cannot be null")
+  @Size(min = 3, max = 50, message = "Email must contain at least 3 character")
+  private String email;
+}</code></pre>
+</div>
+
+<div class="section">
+    <h2>Tip: Create Separate DTOs</h2>
+    <p>It's a best practice to use distinct DTO classes for requests and responses.</p>
+
+    <h3>Request DTO:</h3>
+    <pre><code class="language-java">public class UserRequestDto {
+  // includes validation annotations
+  private String username;
+  private String password;
+  private String email;
+}</code></pre>
+
+    <h3>Response DTO:</h3>
+    <pre><code class="language-java">public class UserResponseDto {
+  private String username;
+  private String email;
+  private String statusMessage;
+}</code></pre>
+    <p>This helps control exposed data and maintain clarity in APIs.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-xml.min.js"></script>
+</body>
+</html>
